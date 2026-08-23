@@ -26,7 +26,7 @@
         <minio.version>8.5.7</minio.version>
         <poi.version>5.2.5</poi.version>
         <mybatis-plus.version>3.5.5</mybatis-plus.version>
-        <mybatis-spring.version>3.0.3</mybatis-spring.version>
+        <mybatis-spring.version>4.1.0</mybatis-spring.version>
         <jjwt.version>0.11.5</jjwt.version>
         <springdoc.version>2.3.0</springdoc.version>
         <dashscope.version>2.19.4</dashscope.version>
