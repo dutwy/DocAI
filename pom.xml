@@ -33,7 +33,7 @@
         <hnswlib.version>1.1.2</hnswlib.version>
         <pdfbox.version>3.0.2</pdfbox.version>
         <jsoup.version>1.17.2</jsoup.version>
-        <tess4j.version>5.8.0</tess4j.version>
+        <tess4j.version>5.20.0</tess4j.version>
     </properties>
 
     <dependencyManagement>
