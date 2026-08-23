@@ -1,0 +1,40 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # 监控 Prometheus 本身
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # 监控 Docker Swarm 节点
+  - job_name: 'node_exporter'
+    dns_sd_configs:
+      - names:
+          - 'tasks.node-exporter'
+        type: 'A'
+        port: 9100
+
+  # 监控容器
+  - job_name: 'cadvisor'
+    dns_sd_configs:
+      - names:
+          - 'tasks.cadvisor'
+        type: 'A'
+        port: 8080
+
+  # Spring Boot Actuator 指标。各服务端口不同，必须显式配置。
+  - job_name: 'docai-services'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets:
+          - 'gateway:8080'
+          - 'user:8081'
+          - 'file:8082'
+          - 'ai:8083'
+          - 'document:8084'

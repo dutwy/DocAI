@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Verify Maven reactor
+        run: |
+          chmod +x mvnw
+          ./mvnw --batch-mode --no-transfer-progress verify
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: vue-test-app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: vue-test-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Build frontend
+        run: npm run build
+
+  deployment-config:
+    name: Deployment configuration
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check shell scripts
+        run: bash -n deploy.sh build-docker.sh
+
+      - name: Validate Compose files
+        run: |
+          for file in \
+            docker-compose-infra.yml \
+            docker-compose-services.yml \
+            docker-compose-gate-user.yml \
+            docker-compose-monitoring.yml
+          do
+            docker compose --env-file .env.example -f "$file" config --quiet
+          done

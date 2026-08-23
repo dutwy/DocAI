@@ -1,0 +1,32 @@
+spring:
+  cloud:
+    discovery:
+      enabled: false
+    service-registry:
+      auto-registration:
+        enabled: false
+    nacos:
+      discovery:
+        enabled: false
+      config:
+        enabled: false
+  data:
+    redis:
+      repositories:
+        enabled: false
+  rabbitmq:
+    listener:
+      simple:
+        auto-startup: false
+
+security:
+  jwt:
+    secret: test-only-jwt-secret-that-is-at-least-thirty-two-bytes
+
+custom:
+  rate-limit:
+    enable: false
+
+logging:
+  level:
+    root: warn

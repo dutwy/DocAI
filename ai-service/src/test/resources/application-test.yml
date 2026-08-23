@@ -1,0 +1,72 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:ai_test;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  sql:
+    init:
+      mode: never
+  cloud:
+    discovery:
+      enabled: false
+    service-registry:
+      auto-registration:
+        enabled: false
+    nacos:
+      discovery:
+        enabled: false
+      config:
+        enabled: false
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 16379
+      repositories:
+        enabled: false
+  rabbitmq:
+    listener:
+      simple:
+        auto-startup: false
+  ai:
+    dashscope:
+      api-key: test-disabled-key
+      embedding:
+        api-key: test-disabled-key
+      rerank:
+        api-key: test-disabled-key
+        enabled: false
+    openai:
+      api-key: test-disabled-key
+      base-url: http://127.0.0.1:19999/v1
+
+ai:
+  vector:
+    initialize-on-startup: false
+  models:
+    openai:
+      "[qwen3.6-plus]":
+        enabled: false
+      "[glm-5]":
+        enabled: false
+      "[kimi-k2.5]":
+        enabled: false
+      "[MiniMax-M2.5]":
+        enabled: false
+
+security:
+  jwt:
+    secret: test-only-jwt-secret-that-is-at-least-thirty-two-bytes
+
+minio:
+  endpoint: http://127.0.0.1:19000
+  access-key: test-access-key
+  secret-key: test-secret-key
+
+app:
+  scheduling:
+    enabled: false
+
+logging:
+  level:
+    root: warn

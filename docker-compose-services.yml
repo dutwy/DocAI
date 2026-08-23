@@ -1,0 +1,155 @@
+services:
+  user:
+    image: ${DOCAI_IMAGE_REGISTRY}/user-service:${DOCAI_IMAGE_TAG}
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: ["node.hostname == ${DOC_AI_NODE1_HOST}"]
+      restart_policy:
+        condition: on-failure
+    environment:
+      SPRING_APPLICATION_NAME: user
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_USERNAME: ${NACOS_USERNAME}
+      SPRING_CLOUD_NACOS_DISCOVERY_PASSWORD: ${NACOS_PASSWORD}
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 4
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 1
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_PREVIOUS_SECRET: ${JWT_PREVIOUS_SECRET}
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      JAVA_TOOL_OPTIONS: -Dmybatis-plus.global-config.db-config.ddl-auto=none
+    networks:
+      - docai-network
+
+  gateway:
+    image: ${DOCAI_IMAGE_REGISTRY}/gateway-service:${DOCAI_IMAGE_TAG}
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: ["node.hostname == ${DOC_AI_MANAGER_HOST}"]
+      restart_policy:
+        condition: on-failure
+    environment:
+      SPRING_APPLICATION_NAME: gateway
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_USERNAME: ${NACOS_USERNAME}
+      SPRING_CLOUD_NACOS_DISCOVERY_PASSWORD: ${NACOS_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_PREVIOUS_SECRET: ${JWT_PREVIOUS_SECRET}
+    networks:
+      - docai-network
+    ports:
+      - "8080:8080"
+
+  # 文件服务
+  file:
+    image: ${DOCAI_IMAGE_REGISTRY}/file-service:${DOCAI_IMAGE_TAG}
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: ["node.hostname == ${DOC_AI_NODE2_HOST}"]
+      restart_policy:
+        condition: on-failure
+    environment:
+      SPRING_APPLICATION_NAME: file
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_USERNAME: ${NACOS_USERNAME}
+      SPRING_CLOUD_NACOS_DISCOVERY_PASSWORD: ${NACOS_PASSWORD}
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 4
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 1
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_PREVIOUS_SECRET: ${JWT_PREVIOUS_SECRET}
+    networks:
+      - docai-network
+
+  # AI 服务
+  ai:
+    image: ${DOCAI_IMAGE_REGISTRY}/ai-service:${DOCAI_IMAGE_TAG}
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: ["node.hostname == ${DOC_AI_NODE2_HOST}"]
+      restart_policy:
+        condition: on-failure
+    environment:
+      SPRING_APPLICATION_NAME: ai
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_USERNAME: ${NACOS_USERNAME}
+      SPRING_CLOUD_NACOS_DISCOVERY_PASSWORD: ${NACOS_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 4
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 1
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_PREVIOUS_SECRET: ${JWT_PREVIOUS_SECRET}
+      WEBSOCKET_ALLOWED_ORIGIN_PATTERNS: ${WEBSOCKET_ALLOWED_ORIGIN_PATTERNS}
+    networks:
+      - docai-network
+
+  # 文档服务
+  document:
+    image: ${DOCAI_IMAGE_REGISTRY}/document-service:${DOCAI_IMAGE_TAG}
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: ["node.hostname == ${DOC_AI_NODE1_HOST}"]
+      restart_policy:
+        condition: on-failure
+    environment:
+      SPRING_APPLICATION_NAME: document
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_USERNAME: ${NACOS_USERNAME}
+      SPRING_CLOUD_NACOS_DISCOVERY_PASSWORD: ${NACOS_PASSWORD}
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 4
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 1
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_PREVIOUS_SECRET: ${JWT_PREVIOUS_SECRET}
+      WEBSOCKET_ALLOWED_ORIGIN_PATTERNS: ${WEBSOCKET_ALLOWED_ORIGIN_PATTERNS}
+    networks:
+      - docai-network
+
+networks:
+  docai-network:
+    external: true

@@ -1,0 +1,49 @@
+services:
+  user:
+    image: ${DOCAI_IMAGE_REGISTRY}/user-service:${DOCAI_IMAGE_TAG}
+    deploy:
+      mode: replicated
+      replicas: 2
+      placement:
+        constraints: ["node.hostname == ${DOC_AI_NODE1_HOST}"]
+      restart_policy:
+        condition: on-failure
+    environment:
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_USERNAME: ${NACOS_USERNAME}
+      SPRING_CLOUD_NACOS_DISCOVERY_PASSWORD: ${NACOS_PASSWORD}
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_PREVIOUS_SECRET: ${JWT_PREVIOUS_SECRET}
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    networks:
+      - docai-network
+
+  gateway:
+    image: ${DOCAI_IMAGE_REGISTRY}/gateway-service:${DOCAI_IMAGE_TAG}
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: ["node.hostname == ${DOC_AI_MANAGER_HOST}"]
+      restart_policy:
+        condition: on-failure
+    environment:
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_USERNAME: ${NACOS_USERNAME}
+      SPRING_CLOUD_NACOS_DISCOVERY_PASSWORD: ${NACOS_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_PREVIOUS_SECRET: ${JWT_PREVIOUS_SECRET}
+    networks:
+      - docai-network
+    ports:
+      - "8080:8080"
+
+networks:
+  docai-network:
+    external: true

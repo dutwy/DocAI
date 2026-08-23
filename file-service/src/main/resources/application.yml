@@ -1,0 +1,135 @@
+spring:
+  config:
+    import: optional:classpath:application-observability.yml
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+  application:
+    name: file
+  
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:infra_mysql}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:doc_ai}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 4
+      minimum-idle: 1
+      idle-timeout: 30000
+      max-lifetime: 300000
+      connection-timeout: 10000
+  
+  cloud:
+    compatibility-verifier:
+      enabled: false
+    nacos:
+      discovery:
+        enabled: true
+        server-addr: nacos:8848
+        namespace: public
+        timeout: 30000
+      client:
+        namespace: public
+        timeout: 30000
+
+  data:
+    redis:
+      host: ${REDIS_HOST:infra_redis}
+      port: 6379
+      password: ${REDIS_PASSWORD}
+      database: 1
+      timeout: 10000
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: -1
+          max-idle: 8
+          min-idle: 0
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:infra_rabbitmq}
+    port: 5672
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+    virtual-host: /
+    listener:
+      simple:
+        concurrency: 1
+        max-concurrency: 10
+        prefetch: 1
+        auto-startup: true
+        default-requeue-rejected: true
+
+  # 文件上传配置
+  servlet:
+    multipart:
+      enabled: true
+      # multipart 仅保留给兼容上传和分片；大文件使用原始请求体流式接口。
+      max-file-size: 32MB
+      max-request-size: 64MB
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.javaee.fileservice.entity
+  configuration:
+    map-underscore-to-camel-case: true
+
+server:
+  port: 8082
+  servlet:
+    context-path: /
+
+minio:
+  endpoint: ${MINIO_ENDPOINT:http://infra_minio:9000}
+  access-key: ${MINIO_ACCESS_KEY}
+  secret-key: ${MINIO_SECRET_KEY}
+  bucket-name: doc-ai
+  # bucket=permissionGroup1,permissionGroup2; another-bucket=groupA
+  # JWT 中的 role 会作为默认权限组；可额外通过 permissionGroups/groups claim 扩展。
+  bucket-permissions: "doc-ai=admin,user"
+  bucket-permission-default-allow: false
+  secure: false
+
+file:
+  storage:
+    type: minio
+    local-path: /data/file-storage
+    max-size: 1024
+    allowed-types:
+      - image/*
+      - application/pdf
+      - application/msword
+      - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+      - application/vnd.ms-excel
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      - application/vnd.ms-powerpoint
+      - application/vnd.openxmlformats-officedocument.presentationml.presentation
+      - text/*
+  transfer:
+    max-file-size: 1GB
+    max-chunk-size: 16MB
+    min-compose-part-size: 5MB
+    buffer-size: 64KB
+    max-chunks: 10000
+    max-multiple-files: 20
+    max-concurrent-streams: 8
+    max-active-sessions-per-user: 3
+    acquire-timeout: 2s
+    session-ttl: 24h
+    cleanup-grace: 1h
+    merge-lock-ttl: 30m
+    chunk-lock-ttl: 5m
+    cleanup-interval: 5m
+
+logging:
+  level:
+    com.javaee.fileservice: ${LOG_LEVEL_APP:INFO}
+    org.springframework.security: info
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:}
+    previous-secret: ${JWT_PREVIOUS_SECRET:}
+    issuer: doc-ai
+    access-token-expiration-ms: 1800000
+    refresh-token-expiration-ms: 604800000

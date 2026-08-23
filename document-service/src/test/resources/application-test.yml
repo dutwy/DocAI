@@ -1,0 +1,53 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:document_test;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  sql:
+    init:
+      mode: never
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 0
+    validate-on-migrate: true
+  cloud:
+    discovery:
+      enabled: false
+    service-registry:
+      auto-registration:
+        enabled: false
+    nacos:
+      discovery:
+        enabled: false
+      config:
+        enabled: false
+  data:
+    redis:
+      repositories:
+        enabled: false
+  rabbitmq:
+    listener:
+      simple:
+        auto-startup: false
+
+security:
+  jwt:
+    secret: test-only-jwt-secret-that-is-at-least-thirty-two-bytes
+  websocket:
+    allowed-origin-patterns: http://localhost
+
+minio:
+  endpoint: http://127.0.0.1:19000
+  access-key: test-access-key
+  secret-key: test-secret-key
+
+file:
+  service:
+    url: http://127.0.0.1:18082
+
+logging:
+  level:
+    root: warn
